@@ -1,4 +1,10 @@
+"""Sometimes the code will not scrape all the videos if the page is not loaded completely."""
+
+#import time
 import pandas as pd
+import os
+import smtplib
+import json
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -39,6 +45,29 @@ def parse_video(video):
     'Channel Name': channel_name,
     'Description': description
   }
+def send_email(body):
+  try:
+    server_ssl = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+    server_ssl.ehlo()
+    SENDER_EMAIL = "meem.morsheeddd@gmail.com"
+    SENDER_PASSWORD = os.environ['EMAIL_PASSWORD']
+    RECEIVER_EMAIL = "meem.morsheeddd@gmail.com"
+    subject = "YouTube Trending Videos"
+    email_text = f""""\
+    From: {SENDER_EMAIL}
+    To: {RECEIVER_EMAIL}
+    Subject: {subject}
+    
+    {body}
+    """
+
+    server_ssl.login(SENDER_EMAIL, SENDER_PASSWORD)
+    server_ssl.sendmail(SENDER_EMAIL, RECEIVER_EMAIL, email_text)
+    server_ssl.close()
+    
+    
+  except:
+    print("Something went wrong")
 
 if __name__ == "__main__":
   print("Creating driver")
@@ -52,5 +81,8 @@ if __name__ == "__main__":
 
   videos_data = [parse_video(video) for video in videos[:10]]
   videos_df = pd.DataFrame(videos_data)
-  print(videos_df)
   videos_df.to_csv("Trending.csv", index = None)
+  
+  print("Sending email")
+  body = json.dumps(videos_data, indent = 2)
+  send_email(body)
