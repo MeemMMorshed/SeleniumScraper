@@ -1,2 +1,2 @@
 # seleniumScraper
-Scrape trending videos on Youtube using Selenium and AWS
+Scrape trending videos on Youtube using Selenium hosted on AWS
